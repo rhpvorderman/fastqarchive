@@ -14,3 +14,28 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with fastqarchive.  If not, see <https://www.gnu.org/licenses/
 
+from pathlib import Path
+from typing import Dict, Tuple
+
+import dnaio
+
+import xopen
+
+
+def count_base_and_quality_combinations(
+        fastq: Path) -> Dict[Tuple[str, str], int]:
+    """
+    Counts base and quality combinations.
+    :param fastq: The fastq file.
+    :return: A dictionary {(Base, Quality): Count}
+    """
+    counts_dict = {}
+    with xopen.xopen(fastq, mode='r') as fastq_handle:
+        fastq_reader = dnaio.FastqReader(fastq_handle)
+        for record in fastq_reader:  # type: dnaio.Sequence
+            for base_qual_combo in zip(record.sequence, record.qualities):
+                try:
+                    counts_dict[base_qual_combo] += 1
+                except KeyError:
+                    counts_dict[base_qual_combo] = 1
+    return counts_dict
