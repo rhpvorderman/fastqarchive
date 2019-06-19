@@ -30,7 +30,7 @@ def count_base_and_quality_combinations(
     :return: A dictionary {(Base, Quality): Count}
     """
     counts_dict = {}
-    with xopen.xopen(fastq, mode='r') as fastq_handle:
+    with xopen.xopen(fastq, mode='rb') as fastq_handle:
         fastq_reader = dnaio.FastqReader(fastq_handle)
         for record in fastq_reader:  # type: dnaio.Sequence
             for base_qual_combo in zip(record.sequence, record.qualities):
