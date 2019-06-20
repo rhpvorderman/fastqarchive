@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with fastqarchive.  If not, see <https://www.gnu.org/licenses/
 
+import unicodedata
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Tuple
-import unicodedata
 
 import dnaio
 
@@ -85,4 +85,3 @@ def printable_one_and_two_byte_utf_eight_chars(
             yield char
         else:
             continue
-    raise StopIteration("No usable one- or two-byte UTF-8 characters left.")
