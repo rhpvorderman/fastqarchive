@@ -16,6 +16,7 @@
 
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Tuple
+import unicodedata
 
 import dnaio
 
@@ -46,23 +47,42 @@ def counts_to_encode_dict(counts_dict: Dict[Tuple[str, str], int]
     pass
 
 
-def printable_two_byte_utf_eight_chars(excludes: Optional[List[str]] = None
-                                       ) -> Iterator[str]:
+def printable_one_and_two_byte_utf_eight_chars(
+        excludes: Optional[List[str]] = None) -> Iterator[str]:
+
     if excludes is None:
         excludes = []
 
-    excluded_char_numbers = []
+    # Check if excludes are single characters by using the ord function.
+    for char in excludes:
+        try:
+            ord(char)
+        except TypeError as e:
+            # Raise custom message.
+            # Ord does not show the original input in its error.
+            raise TypeError("'{0}' is not a character. {1}".format(
+                char, str(e)))
 
-    # Exclude user defined exclude characters
-    excluded_char_numbers += [ord(char) for char in excludes]
+    exclude_set = set(excludes)
 
-    # Exclude ranges which cannot be printed as a single character
-    excluded_char_numbers += list(range(32))        # Control characters
-    excluded_char_numbers += [127]                  # Control character (Delete)
-    excluded_char_numbers += list(range(128, 160))  # control characters
-    excluded_char_numbers += list(range(688, 768))  # Spacing Modifier Letters
-    # Exclude all non-printable and space characters known by python
+    # For two byte UTF-8 characters only accept characters from the following
+    # categories:
+    # 'Ll' : lower-case letters
+    # 'Lu' : upper-case letters
+    two_byte_categories = {'Ll', 'Lu'}
+
     for i in range(2048):
         char = chr(i)
-        if char.isprintable() and not char.isspace():
-            excluded_char_numbers.append(i)
+        if char in exclude_set:
+            continue
+
+        # One-byte UTF-8 characters
+        elif i < 128 and char.isprintable() and not char.isspace():
+            yield char
+
+        # Two-byte UTF-8 characters
+        elif i > 128 and unicodedata.category(char) in two_byte_categories:
+            yield char
+        else:
+            continue
+    raise StopIteration("No usable one- or two-byte UTF-8 characters left.")
