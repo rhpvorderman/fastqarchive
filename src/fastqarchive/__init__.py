@@ -47,14 +47,20 @@ def counts_to_encode_dict(counts_dict: Dict[Tuple[str, str], int]
     pass
 
 
-def printable_one_and_two_byte_utf_eight_chars(
-        excludes: Optional[List[str]] = None) -> Iterator[str]:
+def printable_utf_chars(exclude_chars: Optional[List[str]] = None
+                        ) -> Iterator[str]:
+    """
+    A generator for printable utf chars that use one or two bytes.
+    The characters are outputted in order of their decimal codes.
+    :param exclude_chars: Characters that should be excluded
+    :return: An iterator that returns one UTF-8 character per iteration.
+    """
 
-    if excludes is None:
-        excludes = []
+    if exclude_chars is None:
+        exclude_chars = []
 
     # Check if excludes are single characters by using the ord function.
-    for char in excludes:
+    for char in exclude_chars:
         try:
             ord(char)
         except TypeError as e:
@@ -63,12 +69,14 @@ def printable_one_and_two_byte_utf_eight_chars(
             raise TypeError("'{0}' is not a character. {1}".format(
                 char, str(e)))
 
-    exclude_set = set(excludes)
+    exclude_set = set(exclude_chars)
 
     # For two byte UTF-8 characters only accept characters from the following
     # categories:
     # 'Ll' : lower-case letters
     # 'Lu' : upper-case letters
+    # Other categories do not uniformly have characters that are easy to
+    # distinguish from whitespace. For example: '´' or '¸'
     two_byte_categories = {'Ll', 'Lu'}
 
     for i in range(2048):
@@ -81,7 +89,7 @@ def printable_one_and_two_byte_utf_eight_chars(
             yield char
 
         # Two-byte UTF-8 characters
-        elif i > 128 and unicodedata.category(char) in two_byte_categories:
+        elif i >= 128 and unicodedata.category(char) in two_byte_categories:
             yield char
         else:
             continue
