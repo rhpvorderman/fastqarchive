@@ -23,45 +23,6 @@ import dnaio
 import xopen
 
 
-def count_base_and_quality_combinations(
-        fastq: Path) -> Dict[Tuple[str, str], int]:
-    """
-    Counts base and quality combinations.
-    :param fastq: The fastq file.
-    :return: A dictionary {(Base, Quality): Count}
-    """
-    counts_dict = {}
-    with xopen.xopen(fastq, mode='rb') as fastq_handle:
-        fastq_reader = dnaio.FastqReader(fastq_handle)
-        for record in fastq_reader:  # type: dnaio.Sequence
-            for base_qual_combo in zip(record.sequence, record.qualities):
-                try:
-                    counts_dict[base_qual_combo] += 1
-                except KeyError:
-                    counts_dict[base_qual_combo] = 1
-    return counts_dict
-
-
-def counts_to_encode_dict(counts_dict: Dict[Tuple[str, str], int]
-                          ) -> Dict[Tuple[str, str], str]:
-
-    sorted_items = sorted(counts_dict.items(),
-                          key=lambda _, count: count,
-                          reverse=True)
-
-    # '@' should be reserved for headers
-    utf_iter = printable_utf_chars(exclude_chars=["@"])
-
-    return {base_qual_combo: next(utf_iter)
-            for base_qual_combo, count in sorted_items}
-
-
-def encode_to_decode_dict(encode_dict: Dict[Tuple[str, str], str]
-                          ) -> Dict[str, Tuple[str, str]]:
-    return {utf_char: base_qual_combo
-            for base_qual_combo, utf_char in encode_dict.items()}
-
-
 def printable_utf_chars(exclude_chars: Optional[List[str]] = None
                         ) -> Iterator[str]:
     """
@@ -108,3 +69,42 @@ def printable_utf_chars(exclude_chars: Optional[List[str]] = None
             yield char
         else:
             continue
+
+
+def count_base_and_quality_combinations(
+        fastq: Path) -> Dict[Tuple[str, str], int]:
+    """
+    Counts base and quality combinations.
+    :param fastq: The fastq file.
+    :return: A dictionary {(Base, Quality): Count}
+    """
+    counts_dict = {}
+    with xopen.xopen(fastq, mode='rb') as fastq_handle:
+        fastq_reader = dnaio.FastqReader(fastq_handle)
+        for record in fastq_reader:  # type: dnaio.Sequence
+            for base_qual_combo in zip(record.sequence, record.qualities):
+                try:
+                    counts_dict[base_qual_combo] += 1
+                except KeyError:
+                    counts_dict[base_qual_combo] = 1
+    return counts_dict
+
+
+def counts_to_encode_dict(counts_dict: Dict[Tuple[str, str], int]
+                          ) -> Dict[Tuple[str, str], str]:
+
+    sorted_items = sorted(counts_dict.items(),
+                          key=lambda _, count: count,
+                          reverse=True)
+
+    # '@' should be reserved for headers
+    utf_iter = printable_utf_chars(exclude_chars=["@"])
+
+    return {base_qual_combo: next(utf_iter)
+            for base_qual_combo, count in sorted_items}
+
+
+def encode_to_decode_dict(encode_dict: Dict[Tuple[str, str], str]
+                          ) -> Dict[str, Tuple[str, str]]:
+    return {utf_char: base_qual_combo
+            for base_qual_combo, utf_char in encode_dict.items()}
