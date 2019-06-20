@@ -1,0 +1,2 @@
+xopen>=0.6.0
+dnaio
