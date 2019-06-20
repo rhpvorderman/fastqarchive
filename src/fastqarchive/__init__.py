@@ -115,7 +115,12 @@ def encode_fastq(fastq: Path, encode_dict: Dict[Tuple[str, str], str]
     with xopen.xopen(fastq, mode='rb') as fastq_handle:
         fastq_iter = dnaio.FastqReader(fastq_handle)
         for sequence in fastq_iter:  # type: dnaio.Sequence
+            # Create an iterator that iterates over each base and quality
+            # combination and encodes it into an utf character using the dict.
             coded_chars = (encode_dict[base_qual_combo]
                            for base_qual_combo
-                           in zip(sequence.sequence, sequence.qualities))
+                           in zip(sequence.sequence, sequence.qualities)
+                           )  # type: Iterator[str]
+
+            # use "".join to convert coded_chars into a string
             yield sequence.name, "".join(coded_chars)
