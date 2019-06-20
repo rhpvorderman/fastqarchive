@@ -92,7 +92,17 @@ def count_base_and_quality_combinations(
 
 def counts_to_encode_dict(counts_dict: Dict[Tuple[str, str], int]
                           ) -> Dict[Tuple[str, str], str]:
+    """
+    Creates an encode dict based on counts of base_qual_combo's. The counts
+    are sorted from highest to lowest. The 93 most frequently occurring
+    base and quality combinations will get an UTF-8 character that is encoded
+    in one byte. The other ones will get an UTF-8 character that is encoded in
+    two bytes.
+    :param counts_dict: A dictionary {(base, quality) : count}
+    :return: A dictionary {(base, quality): UTF-8 character}
+    """
 
+    # Sort based on count, from highest to lowest.
     sorted_items = sorted(counts_dict.items(),
                           key=lambda _, count: count,
                           reverse=True)
@@ -106,12 +116,24 @@ def counts_to_encode_dict(counts_dict: Dict[Tuple[str, str], int]
 
 def encode_to_decode_dict(encode_dict: Dict[Tuple[str, str], str]
                           ) -> Dict[str, Tuple[str, str]]:
+    """
+    Reverses the encode dictionary so it can be used for decoding
+    :param encode_dict: A dictionary {(base, quality): UTF-8 character}
+    :return:  A dictionary {UTF-8 character: (base, quality)}
+    """
     return {utf_char: base_qual_combo
             for base_qual_combo, utf_char in encode_dict.items()}
 
 
 def encode_fastq(fastq: Path, encode_dict: Dict[Tuple[str, str], str]
                  ) -> Iterator[Tuple[str, str]]:
+    """
+
+    :param fastq: A fastq file to encode
+    :param encode_dict: A dictionary {(base, quality): UTF-8 character}
+    :return: An iterator that returns tuples of
+    (fastq record name, fqarc encoded sequence)
+    """
     with xopen.xopen(fastq, mode='rb') as fastq_handle:
         fastq_iter = dnaio.FastqReader(fastq_handle)
 
