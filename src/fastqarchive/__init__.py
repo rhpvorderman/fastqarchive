@@ -78,7 +78,8 @@ def count_base_and_quality_combinations(
     :param fastq: The fastq file.
     :return: A dictionary {(Base, Quality): Count}
     """
-    counts_dict = {}
+    counts_dict = {}  # type: Dict[Tuple[str, str], int]
+
     with xopen.xopen(fastq, mode='rb') as fastq_handle:
         fastq_reader = dnaio.FastqReader(fastq_handle)
         for record in fastq_reader:  # type: dnaio.Sequence
@@ -104,7 +105,7 @@ def counts_to_encode_dict(counts_dict: Dict[Tuple[str, str], int]
 
     # Sort based on count, from highest to lowest.
     sorted_items = sorted(counts_dict.items(),
-                          key=lambda _, count: count,
+                          key=lambda x: x[1],  # x = ((base, quality), count)
                           reverse=True)
 
     # '@' should be reserved for headers
