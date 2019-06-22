@@ -13,3 +13,5 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with fastqarchive.  If not, see <https://www.gnu.org/licenses/
+
+DEFAULT_BYTE_ORDER = "little"  # Default for x86
