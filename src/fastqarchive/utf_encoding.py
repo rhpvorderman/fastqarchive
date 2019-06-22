@@ -14,12 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with fastqarchive.  If not, see <https://www.gnu.org/licenses/
 
-from typing import Dict, Iterator, List, Optional, Tuple
 import unicodedata
+from pathlib import Path
+from typing import Dict, Iterator, List, Optional, Tuple
 
 import dnaio
 
 import xopen
+
 
 def printable_utf_chars(exclude_chars: Optional[List[str]] = None
                         ) -> Iterator[str]:
@@ -102,8 +104,6 @@ def encode_to_decode_dict(encode_dict: Dict[Tuple[str, str], str]
     """
     return {utf_char: base_qual_combo
             for base_qual_combo, utf_char in encode_dict.items()}
-
-
 
 
 def encode_fastq(fastq: Path, encode_dict: Dict[Tuple[str, str], str]

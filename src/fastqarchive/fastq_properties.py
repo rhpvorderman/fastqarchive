@@ -17,9 +17,9 @@
 from pathlib import Path
 from typing import Dict, Tuple
 
-import xopen
-
 import dnaio
+
+import xopen
 
 
 def count_base_and_quality_combinations(
