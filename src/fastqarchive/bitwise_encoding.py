@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with fastqarchive.  If not, see <https://www.gnu.org/licenses/
 
-from typing import Iterable, Iterator
+from typing import Iterable, List
 
 
 def int_list_to_bitstring(int_list: Iterable[int], bit_length: int) -> int:
@@ -29,8 +29,10 @@ def int_list_to_bitstring(int_list: Iterable[int], bit_length: int) -> int:
         bitstring = bitstring << bit_length  # Same as bitstring * (2 ** bit_length -1)  # noqa: E501
         bitstring += integer
 
+    return bitstring
 
-def bitstring_to_int_list(bitstring: int, bit_length: int) -> Iterator[int]:
+
+def bitstring_to_int_list(bitstring: int, bit_length: int) -> List[int]:
 
     if bitstring.bit_length() % bit_length != 0:
         raise ValueError(
@@ -40,13 +42,20 @@ def bitstring_to_int_list(bitstring: int, bit_length: int) -> Iterator[int]:
             )
         )
 
+    integer_list = []  # type: List[int]
+
     # If bit_length = 5, bit_mask = "0b11111" bl=6 bm="0b111111" etc.
     bit_mask = 2 ** bit_length - 1
 
     while bitstring > 0:
         # Get the integer encoded in the last <bit_length> bits.
-        yield bitstring & bit_mask
+        integer_list.append(bitstring & bit_mask)
         bitstring = bitstring >> bit_length
+
+    # This means we get the last bits first. Hence we have to reverse the list.
+    integer_list.reverse()
+
+    return integer_list
 
 
 def bitstring_to_right_padded_bytes(bitstring) -> bytes:
