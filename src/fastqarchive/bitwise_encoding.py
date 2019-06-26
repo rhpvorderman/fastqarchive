@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Leiden University Medical Center
+# Copyright (C) 2019 Ruben Vorderman, Leiden University Medical Center
 # This file is part of fastqarchive
 #
 # fastqarchive is free software: you can redistribute it and/or modify
@@ -33,14 +33,6 @@ def int_list_to_bitstring(int_list: Iterable[int], bit_length: int) -> int:
 
 
 def bitstring_to_int_list(bitstring: int, bit_length: int) -> List[int]:
-
-    if bitstring.bit_length() % bit_length != 0:
-        raise ValueError(
-            "Bitstring of length {0} is not divisible by {1}".format(
-                bitstring.bit_length(),
-                bit_length
-            )
-        )
 
     integer_list = []  # type: List[int]
 

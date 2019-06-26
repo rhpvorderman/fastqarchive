@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Leiden University Medical Center
+# Copyright (C) 2019 Ruben Vorderman, Leiden University Medical Center
 # This file is part of fastqarchive
 #
 # fastqarchive is free software: you can redistribute it and/or modify

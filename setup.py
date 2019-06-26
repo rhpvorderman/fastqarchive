@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Leiden University Medical Center
+# Copyright (C) 2019 Ruben Vorderman, Leiden University Medical Center
 # This file is part of fastqarchive
 #
 # fastqarchive is free software: you can redistribute it and/or modify
@@ -23,8 +23,8 @@ setup(
     name="fastqarchive",
     version="0.1.0-dev",
     description="Compress FASTQ data for archival purposes.",
-    author="Leiden University Medical Center",
-    author_email="sasc@lumc.nl",  # A placeholder for now
+    author="Ruben Vorderman",
+    author_email="r.h.p.vorderman@lumc.nl",  # A placeholder for now
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/x-rst",
     license="AGPL-3.0-or-later",

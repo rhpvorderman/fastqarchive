@@ -2,6 +2,7 @@
 -r requirements-docs.txt
 tox
 pytest
+coverage
 flake8
 flake8-import-order
 mypy
