@@ -17,32 +17,60 @@
 from typing import Iterable, List
 
 
-def int_list_to_bitstring(int_list: Iterable[int], bit_length: int) -> int:
+def int_list_to_bitstring(int_list: List[int], char_bit_length: int) -> bytes:
     bitstring = 0  # type: int # Because a python integer is a list of bits.
     for integer in int_list:
-        if integer.bit_length() > bit_length:
+        if integer.bit_length() > char_bit_length:
             raise ValueError(
-                "Integer '{0} is bigger than {1}".format(
-                    integer, 2 ** bit_length - 1
+                "Integer '{0} is bigger than {1}. Only {2}-bit integers"
+                "supported".format(
+                    integer, 2 ** char_bit_length - 1, char_bit_length
                 )
             )
-        bitstring = bitstring << bit_length  # Same as bitstring * (2 ** bit_length -1)  # noqa: E501
+        bitstring <<= char_bit_length  # Same as bitstring * (2 ** bit_length -1)  # noqa: E501
         bitstring += integer
 
-    return bitstring
+    # Right-pad with zeros
+    total_bit_length = len(int_list) * char_bit_length
+    bit_overhead = total_bit_length % 8
+    if bit_overhead != 0:
+        bitstring = bitstring << (8 - bit_overhead)
+    return bitstring.to_bytes(
+        length=bitstring.bit_length() // 8,
+        byteorder="big",
+        # Should be big. So it can be read from left to right.
+        signed=False)  # Signed integers do not make sense in a bitstring
 
 
-def bitstring_to_int_list(bitstring: int, bit_length: int) -> List[int]:
+def bitstring_to_int_list(bitstring_as_bytes: bytes, char_bit_length: int) -> List[int]:
+    bitstring = int.from_bytes(bitstring_as_bytes,
+                             byteorder="big",
+                             signed=False)
+
+    total_bit_length = len(bitstring_as_bytes) * 8
+    minimum_pad_length = total_bit_length % char_bit_length
+
+    bitstring >>= minimum_pad_length
+
+    max_empty_bitchars = (8 // char_bit_length - 1
+                          if char_bit_length % 2 == 0
+                          else 8 // char_bit_length)
+
+    # If bit_length = 5, bit_mask = "0b11111" bl=6 bm="0b111111" etc.
+    bit_mask = 2 ** char_bit_length - 1
+
+    for _ in range(max_empty_bitchars):
+        # shift if there is an empty bit char
+        if bitstring & bit_mask == 0:
+            bitstring >>= char_bit_length
 
     integer_list = []  # type: List[int]
 
-    # If bit_length = 5, bit_mask = "0b11111" bl=6 bm="0b111111" etc.
-    bit_mask = 2 ** bit_length - 1
 
     while bitstring > 0:
         # Get the integer encoded in the last <bit_length> bits.
         integer_list.append(bitstring & bit_mask)
-        bitstring = bitstring >> bit_length
+        bitstring = bitstring >> char_bit_length
 
     # This means we get the last bits first. Hence we have to reverse the list.
     integer_list.reverse()
@@ -81,20 +109,3 @@ def bitstring_to_right_padded_bytes(bitstring) -> bytes:
 
 
 def right_padded_bytes_to_bitstring(right_padded_bytes, bit_length) -> int:
-    bitstring = int.from_bytes(right_padded_bytes,
-                               byteorder="big",
-                               signed=False)
-
-    minimum_pad_length = bitstring.bit_length() % bit_length
-    bitstring = bitstring >> minimum_pad_length
-
-    max_empty_bitchars = (8 // bit_length - 1
-                          if bit_length % 2 == 0
-                          else 8 // bit_length)
-
-    for _ in range(max_empty_bitchars):
-        # shift if there is an empty bit char
-        if bitstring & (2 ** bit_length - 1) == 0:
-            bitstring >> bit_length
-
-    return bitstring
