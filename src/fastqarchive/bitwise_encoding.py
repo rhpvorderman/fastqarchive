@@ -36,7 +36,7 @@ def int_list_to_bitstring(int_list: List[int], char_bit_length: int) -> bytes:
     if bit_overhead != 0:
         bitstring = bitstring << (8 - bit_overhead)
     return bitstring.to_bytes(
-        length=bitstring.bit_length() // 8,
+        length=total_bit_length // 8 + 1 if bit_overhead else total_bit_length // 8,
         byteorder="big",
         # Should be big. So it can be read from left to right.
         signed=False)  # Signed integers do not make sense in a bitstring
