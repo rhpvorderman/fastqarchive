@@ -16,15 +16,15 @@
 
 from fastqarchive.bitwise_encoding \
     import bitstring_to_int_list, bitstring_to_right_padded_bytes, \
-    int_list_to_bitstring, right_padded_bytes_to_bitstring
+    int_list_to_bitstring
 
 import pytest
 
 INT_LISTS_BITSTRINGS = [
-    ([1,2,3], 3 , 0b001010011),
-    ([1,2,3], 4, 0b000100100011),
-    ([1,2,3], 5, 0b000010001000011),
-    ([12,25], 5, 0b0110011001)
+    ([1,2,3], 3, 0b0010100110000000.to_bytes(2, "big")),
+    ([1,2,3], 4, 0b0001001000110000.to_bytes(2, "big")),
+    ([1,2,3], 5, 0b0000100010000110.to_bytes(2, "big")),
+    ([12,25], 5, 0b0110011001000000.to_bytes(2, "big"))
 ]
 
 

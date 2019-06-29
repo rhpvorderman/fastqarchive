@@ -70,7 +70,7 @@ def bitstring_to_int_list(bitstring_as_bytes: bytes, char_bit_length: int) -> Li
     while bitstring > 0:
         # Get the integer encoded in the last <bit_length> bits.
         integer_list.append(bitstring & bit_mask)
-        bitstring = bitstring >> char_bit_length
+        bitstring >>= char_bit_length
 
     # This means we get the last bits first. Hence we have to reverse the list.
     integer_list.reverse()
@@ -106,6 +106,3 @@ def bitstring_to_right_padded_bytes(bitstring) -> bytes:
         length=bitstring.bit_length() // 8,
         byteorder="big",  # Should be big. So it can be read from left to right. # noqa: E501
         signed=False)  # Signed integers do not make sense in a bitstring
-
-
-def right_padded_bytes_to_bitstring(right_padded_bytes, bit_length) -> int:
