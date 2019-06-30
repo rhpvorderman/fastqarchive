@@ -14,8 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with fastqarchive.  If not, see <https://www.gnu.org/licenses/
 
+import io
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, Iterator, Tuple
 
 import dnaio
 
@@ -40,3 +41,22 @@ def count_base_and_quality_combinations(
                 except KeyError:
                     counts_dict[base_qual_combo] = 1
     return counts_dict
+
+
+def fastq_iterator(fastq_handle: io.BufferedReader, two_headers: bool= False
+                   ) -> Iterator[Tuple[bytes, bytes, bytes]]:
+    while True:
+        name = next(fastq_handle).rstrip()
+        sequence = next(fastq_handle).rstrip()
+        plus_line = next(fastq_handle)
+        if two_headers:
+            if not plus_line.rstrip()[1:] == name[1:]:
+                raise ValueError(
+                    "Fastq record with unequal headers: '{0}' and '{1}'"
+                    "".format(name, plus_line.rstrip()))
+        qualities = next(fastq_handle).rstrip()
+        if len(sequence) != len(qualities):
+            raise ValueError(
+                "Fastq record with sequence and qualities of unequal length"
+            )
+        yield name, sequence, qualities
