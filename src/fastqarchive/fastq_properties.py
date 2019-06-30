@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with fastqarchive.  If not, see <https://www.gnu.org/licenses/
 
-import io
 from pathlib import Path
+import typing
 from typing import Dict, Iterator, Tuple
 
 import dnaio
@@ -43,8 +43,16 @@ def count_base_and_quality_combinations(
     return counts_dict
 
 
-def fastq_iterator(fastq_handle: io.BufferedReader, two_headers: bool= False
+# DEPRECATED: Use DNAIO instead as it is much faster.
+def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool= False
                    ) -> Iterator[Tuple[bytes, bytes, bytes]]:
+    """
+    Iterate over fastq records return name, sequence, qualities as bytes.
+    :param fastq_handle: a fastq file handle.
+    :param two_headers: Whether the iterator should check if the headers are
+    the same.
+    :return: name, sequences, qualities. All bytestrings
+    """
     while True:
         name = next(fastq_handle).rstrip()
         sequence = next(fastq_handle).rstrip()
