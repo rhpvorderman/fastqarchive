@@ -18,8 +18,6 @@ from pathlib import Path
 import typing
 from typing import Dict, Iterator, Tuple
 
-import dnaio
-
 import xopen
 
 
@@ -33,9 +31,8 @@ def count_base_and_quality_combinations(
     counts_dict = {}  # type: Dict[Tuple[str, str], int]
 
     with xopen.xopen(fastq, mode='rb') as fastq_handle:
-        fastq_reader = dnaio.FastqReader(fastq_handle)
-        for record in fastq_reader:  # type: dnaio.Sequence
-            for base_qual_combo in zip(record.sequence, record.qualities):
+        for name, sequence, qualities in fastq_iterator(fastq_handle):
+            for base_qual_combo in zip(sequence, qualities):
                 try:
                     counts_dict[base_qual_combo] += 1
                 except KeyError:
