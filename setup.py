@@ -45,6 +45,5 @@ setup(
     python_requires=">=3.5",  # Because we use type annotation.
     install_requires=[
         "xopen>=0.6.0",
-        "dnaio"
     ],
 )

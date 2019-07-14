@@ -43,8 +43,12 @@ def count_base_and_quality_combinations(
     return counts_dict
 
 
-# DEPRECATED: Use DNAIO instead as it is much faster.
-def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool= False
+# Marcelm's dnaio is slightly faster. But this algorithm comes close, without
+# using cython. This is because this returns a tuple which can be unpacked,
+# which is more efficient than an object with access methods.
+# This can be further improved by using Cython to leverage "get line" functions
+# from glibc.
+def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool = False
                    ) -> Iterator[Tuple[bytes, bytes, bytes]]:
     """
     Iterate over fastq records return name, sequence, qualities as bytes.
@@ -54,15 +58,23 @@ def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool= False
     :return: name, sequences, qualities. All bytestrings
     """
     while True:
-        name = next(fastq_handle).rstrip()
-        sequence = next(fastq_handle).rstrip()
-        plus_line = next(fastq_handle)
+        try:
+            name = next(fastq_handle).rstrip()
+        except StopIteration:
+            return
+        try:
+            sequence = next(fastq_handle).rstrip()
+            plus_line = next(fastq_handle)
+            qualities = next(fastq_handle).rstrip()
+        except StopIteration:
+            raise ValueError("Incomplete Fastq Record at end of file")
+
         if two_headers:
             if not plus_line.rstrip()[1:] == name[1:]:
                 raise ValueError(
                     "Fastq record with unequal headers: '{0}' and '{1}'"
                     "".format(name, plus_line.rstrip()))
-        qualities = next(fastq_handle).rstrip()
+
         if len(sequence) != len(qualities):
             raise ValueError(
                 "Fastq record with sequence and qualities of unequal length"
