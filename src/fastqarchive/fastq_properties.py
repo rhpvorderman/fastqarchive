@@ -16,7 +16,7 @@
 
 from pathlib import Path
 import typing
-from typing import Dict, Iterator, Tuple
+from typing import Dict, Generator, Tuple
 
 import xopen
 
@@ -46,7 +46,7 @@ def count_base_and_quality_combinations(
 # This can be further improved by using Cython to leverage "get line" functions
 # from glibc.
 def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool = False
-                   ) -> Iterator[Tuple[bytes, bytes, bytes]]:
+                   ) -> Generator[Tuple[bytes, bytes, bytes]]:
     """
     Iterate over fastq records return name, sequence, qualities as bytes.
     :param fastq_handle: a fastq file handle.
@@ -59,6 +59,9 @@ def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool = False
             name = next(fastq_handle).rstrip()
         except StopIteration:
             return
+        if not name.startswith(b"@"):
+            raise ValueError("Record header should start with '@'.")
+
         try:
             sequence = next(fastq_handle).rstrip()
             plus_line = next(fastq_handle)
@@ -77,3 +80,44 @@ def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool = False
                 "Fastq record with sequence and qualities of unequal length"
             )
         yield name, sequence, qualities
+
+
+def fastq_iterator2(fastq_handle: typing.BinaryIO, two_headers: bool = False
+                   ) -> Generator[Tuple[bytes, bytes, bytes]]:
+    """
+    Iterate over fastq records return name, sequence, qualities as bytes.
+    :param fastq_handle: a fastq file handle.
+    :param two_headers: Whether the iterator should check if the headers are
+    the same.
+    :return: name, sequences, qualities. All bytestrings
+    """
+    i=0
+    for line in fastq_handle:
+        i += 1
+        if i == 1:
+            name = line.rstrip()
+            if not name.startswith(b"@"):
+                raise ValueError("Record header should start with '@'.")
+        elif i == 2:
+            sequence = line.rstrip()
+        elif i == 3 and two_headers:
+            plus = line.rstrip()
+            if not name[1:] == plus[1:]:
+                raise ValueError(
+                    "Fastq record with unequal headers: '{0}' and '{1}'"
+                    "".format(name, plus))
+        elif i == 4:
+            qualities = line.rstrip()
+            if len(sequence) != len(qualities):
+                raise ValueError(
+                    "Fastq record with sequence and qualities of unequal length"
+                )
+            yield name, sequence, qualities
+            # reset counter.
+            i = 0
+        else:  # In case two_headers = False we don't check the plus line.
+            pass
+    if i != 0:
+        # i should be zero if the file ended with a valid fastq record.
+        raise ValueError("Incomplete Fastq Record at end of file")
+    return
