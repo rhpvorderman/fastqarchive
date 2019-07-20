@@ -16,7 +16,7 @@
 
 from pathlib import Path
 import typing
-from typing import Dict, Generator, Tuple
+from typing import Dict, Iterable, Tuple
 
 import xopen
 
@@ -46,7 +46,7 @@ def count_base_and_quality_combinations(
 # This can be further improved by using Cython to leverage "get line" functions
 # from glibc.
 def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool = False
-                   ) -> Generator[Tuple[bytes, bytes, bytes]]:
+                   ) -> Iterable[Tuple[bytes, bytes, bytes]]:
     """
     Iterate over fastq records return name, sequence, qualities as bytes.
     :param fastq_handle: a fastq file handle.
@@ -83,7 +83,7 @@ def fastq_iterator(fastq_handle: typing.BinaryIO, two_headers: bool = False
 
 
 def fastq_iterator2(fastq_handle: typing.BinaryIO, two_headers: bool = False
-                   ) -> Generator[Tuple[bytes, bytes, bytes]]:
+                   ) -> Iterable[Tuple[bytes, bytes, bytes]]:
     """
     Iterate over fastq records return name, sequence, qualities as bytes.
     :param fastq_handle: a fastq file handle.

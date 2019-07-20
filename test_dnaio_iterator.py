@@ -10,9 +10,7 @@ if __name__ == '__main__':
     with fastq.open('rb') as fastq_handle:
 
         for sequence in FastqReader(fastq_handle):  # type: Sequence
-            sequence.name
-            sequence.sequence
-            sequence.qualities
+            pass
 
 
 
